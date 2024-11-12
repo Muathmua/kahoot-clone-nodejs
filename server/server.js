@@ -211,273 +211,273 @@ io.on('connection', (socket) => {
     });
     
     //Sets data in player class to answer from player
-    socket.on('playerAnswer', function(num){
-        var player = players.getPlayer(socket.id);
-        var hostId = player.hostId;
-        var playerNum = players.getPlayers(hostId);
-        var game = games.getGame(hostId);
-        if(game.gameData.questionLive == true){//if the question is still live
-            player.gameData.answer = num;
-            game.gameData.playersAnswered += 1;
+    // socket.on('playerAnswer', function(num){
+    //     var player = players.getPlayer(socket.id);
+    //     var hostId = player.hostId;
+    //     var playerNum = players.getPlayers(hostId);
+    //     var game = games.getGame(hostId);
+    //     if(game.gameData.questionLive == true){//if the question is still live
+    //         player.gameData.answer = num;
+    //         game.gameData.playersAnswered += 1;
             
-            var gameQuestion = game.gameData.question;
-            var gameid = game.gameData.gameid;
+    //         var gameQuestion = game.gameData.question;
+    //         var gameid = game.gameData.gameid;
             
-            MongoClient.connect(url, function(err, db){
-                if (err) throw err;
+    //         MongoClient.connect(url, function(err, db){
+    //             if (err) throw err;
     
-                var dbo = db.db('kahootDB');
-                var query = { id:  parseInt(gameid)};
-                dbo.collection("kahootGames").find(query).toArray(function(err, res) {
-                    if (err) throw err;
-                    var correctAnswer = res[0].questions[gameQuestion - 1].correct;
-                    //Checks player answer with correct answer
-                    if(num == correctAnswer){
-                        player.gameData.score += 100;
-                        io.to(game.pin).emit('getTime', socket.id);
-                        socket.emit('answerResult', true);
-                    }
+    //             var dbo = db.db('kahootDB');
+    //             var query = { id:  parseInt(gameid)};
+    //             dbo.collection("kahootGames").find(query).toArray(function(err, res) {
+    //                 if (err) throw err;
+    //                 var correctAnswer = res[0].questions[gameQuestion - 1].correct;
+    //                 //Checks player answer with correct answer
+    //                 if(num == correctAnswer){
+    //                     player.gameData.score += 100;
+    //                     io.to(game.pin).emit('getTime', socket.id);
+    //                     socket.emit('answerResult', true);
+    //                 }
 
-                    //Checks if all players answered
-                    if(game.gameData.playersAnswered == playerNum.length){
-                        game.gameData.questionLive = false; //Question has been ended bc players all answered under time
-                        var playerData = players.getPlayers(game.hostId);
-                        io.to(game.pin).emit('questionOver', playerData, correctAnswer);//Tell everyone that question is over
-                    }else{
-                        //update host screen of num players answered
-                        io.to(game.pin).emit('updatePlayersAnswered', {
-                            playersInGame: playerNum.length,
-                            playersAnswered: game.gameData.playersAnswered
-                        });
-                    }
+    //                 //Checks if all players answered
+    //                 if(game.gameData.playersAnswered == playerNum.length){
+    //                     game.gameData.questionLive = false; //Question has been ended bc players all answered under time
+    //                     var playerData = players.getPlayers(game.hostId);
+    //                     io.to(game.pin).emit('questionOver', playerData, correctAnswer);//Tell everyone that question is over
+    //                 }else{
+    //                     //update host screen of num players answered
+    //                     io.to(game.pin).emit('updatePlayersAnswered', {
+    //                         playersInGame: playerNum.length,
+    //                         playersAnswered: game.gameData.playersAnswered
+    //                     });
+    //                 }
                     
-                    db.close();
-                });
-            });
+    //                 db.close();
+    //             });
+    //         });
             
             
             
-        }
-    });
+    //     }
+    // });
     
-    socket.on('getScore', function(){
-        var player = players.getPlayer(socket.id);
-        socket.emit('newScore', player.gameData.score); 
-    });
+    // socket.on('getScore', function(){
+    //     var player = players.getPlayer(socket.id);
+    //     socket.emit('newScore', player.gameData.score); 
+    // });
     
-    socket.on('time', function(data){
-        var time = data.time / 20;
-        time = time * 100;
-        var playerid = data.player;
-        var player = players.getPlayer(playerid);
-        player.gameData.score += time;
-    });
+    // socket.on('time', function(data){
+    //     var time = data.time / 20;
+    //     time = time * 100;
+    //     var playerid = data.player;
+    //     var player = players.getPlayer(playerid);
+    //     player.gameData.score += time;
+    // });
     
     
     
-    socket.on('timeUp', function(){
-        var game = games.getGame(socket.id);
-        game.gameData.questionLive = false;
-        var playerData = players.getPlayers(game.hostId);
+    // socket.on('timeUp', function(){
+    //     var game = games.getGame(socket.id);
+    //     game.gameData.questionLive = false;
+    //     var playerData = players.getPlayers(game.hostId);
         
-        var gameQuestion = game.gameData.question;
-        var gameid = game.gameData.gameid;
+    //     var gameQuestion = game.gameData.question;
+    //     var gameid = game.gameData.gameid;
             
-            MongoClient.connect(url, function(err, db){
-                if (err) throw err;
+    //         MongoClient.connect(url, function(err, db){
+    //             if (err) throw err;
     
-                var dbo = db.db('kahootDB');
-                var query = { id:  parseInt(gameid)};
-                dbo.collection("kahootGames").find(query).toArray(function(err, res) {
-                    if (err) throw err;
-                    var correctAnswer = res[0].questions[gameQuestion - 1].correct;
-                    io.to(game.pin).emit('questionOver', playerData, correctAnswer);
+    //             var dbo = db.db('kahootDB');
+    //             var query = { id:  parseInt(gameid)};
+    //             dbo.collection("kahootGames").find(query).toArray(function(err, res) {
+    //                 if (err) throw err;
+    //                 var correctAnswer = res[0].questions[gameQuestion - 1].correct;
+    //                 io.to(game.pin).emit('questionOver', playerData, correctAnswer);
                     
-                    db.close();
-                });
-            });
-    });
+    //                 db.close();
+    //             });
+    //         });
+    // });
     
-    socket.on('nextQuestion', function(){
-        var playerData = players.getPlayers(socket.id);
-        //Reset players current answer to 0
-        for(var i = 0; i < Object.keys(players.players).length; i++){
-            if(players.players[i].hostId == socket.id){
-                players.players[i].gameData.answer = 0;
-            }
-        }
+    // socket.on('nextQuestion', function(){
+    //     var playerData = players.getPlayers(socket.id);
+    //     //Reset players current answer to 0
+    //     for(var i = 0; i < Object.keys(players.players).length; i++){
+    //         if(players.players[i].hostId == socket.id){
+    //             players.players[i].gameData.answer = 0;
+    //         }
+    //     }
         
-        var game = games.getGame(socket.id);
-        game.gameData.playersAnswered = 0;
-        game.gameData.questionLive = true;
-        game.gameData.question += 1;
-        var gameid = game.gameData.gameid;
+    //     var game = games.getGame(socket.id);
+    //     game.gameData.playersAnswered = 0;
+    //     game.gameData.questionLive = true;
+    //     game.gameData.question += 1;
+    //     var gameid = game.gameData.gameid;
         
         
         
-        MongoClient.connect(url, function(err, db){
-                if (err) throw err;
+    //     MongoClient.connect(url, function(err, db){
+    //             if (err) throw err;
     
-                var dbo = db.db('kahootDB');
-                var query = { id:  parseInt(gameid)};
-                dbo.collection("kahootGames").find(query).toArray(function(err, res) {
-                    if (err) throw err;
+    //             var dbo = db.db('kahootDB');
+    //             var query = { id:  parseInt(gameid)};
+    //             dbo.collection("kahootGames").find(query).toArray(function(err, res) {
+    //                 if (err) throw err;
                     
-                    if(res[0].questions.length >= game.gameData.question){
-                        var questionNum = game.gameData.question;
-                        questionNum = questionNum - 1;
-                        var question = res[0].questions[questionNum].question;
-                        var answer1 = res[0].questions[questionNum].answers[0];
-                        var answer2 = res[0].questions[questionNum].answers[1];
-                        var answer3 = res[0].questions[questionNum].answers[2];
-                        var answer4 = res[0].questions[questionNum].answers[3];
-                        var correctAnswer = res[0].questions[questionNum].correct;
+    //                 if(res[0].questions.length >= game.gameData.question){
+    //                     var questionNum = game.gameData.question;
+    //                     questionNum = questionNum - 1;
+    //                     var question = res[0].questions[questionNum].question;
+    //                     var answer1 = res[0].questions[questionNum].answers[0];
+    //                     var answer2 = res[0].questions[questionNum].answers[1];
+    //                     var answer3 = res[0].questions[questionNum].answers[2];
+    //                     var answer4 = res[0].questions[questionNum].answers[3];
+    //                     var correctAnswer = res[0].questions[questionNum].correct;
 
-                        socket.emit('gameQuestions', {
-                            q1: question,
-                            a1: answer1,
-                            a2: answer2,
-                            a3: answer3,
-                            a4: answer4,
-                            correct: correctAnswer,
-                            playersInGame: playerData.length
-                        });
-                        db.close();
-                    }else{
-                        var playersInGame = players.getPlayers(game.hostId);
-                        var first = {name: "", score: 0};
-                        var second = {name: "", score: 0};
-                        var third = {name: "", score: 0};
-                        var fourth = {name: "", score: 0};
-                        var fifth = {name: "", score: 0};
+    //                     socket.emit('gameQuestions', {
+    //                         q1: question,
+    //                         a1: answer1,
+    //                         a2: answer2,
+    //                         a3: answer3,
+    //                         a4: answer4,
+    //                         correct: correctAnswer,
+    //                         playersInGame: playerData.length
+    //                     });
+    //                     db.close();
+    //                 }else{
+    //                     var playersInGame = players.getPlayers(game.hostId);
+    //                     var first = {name: "", score: 0};
+    //                     var second = {name: "", score: 0};
+    //                     var third = {name: "", score: 0};
+    //                     var fourth = {name: "", score: 0};
+    //                     var fifth = {name: "", score: 0};
                         
-                        for(var i = 0; i < playersInGame.length; i++){
-                            console.log(playersInGame[i].gameData.score);
-                            if(playersInGame[i].gameData.score > fifth.score){
-                                if(playersInGame[i].gameData.score > fourth.score){
-                                    if(playersInGame[i].gameData.score > third.score){
-                                        if(playersInGame[i].gameData.score > second.score){
-                                            if(playersInGame[i].gameData.score > first.score){
-                                                //First Place
-                                                fifth.name = fourth.name;
-                                                fifth.score = fourth.score;
+    //                     for(var i = 0; i < playersInGame.length; i++){
+    //                         console.log(playersInGame[i].gameData.score);
+    //                         if(playersInGame[i].gameData.score > fifth.score){
+    //                             if(playersInGame[i].gameData.score > fourth.score){
+    //                                 if(playersInGame[i].gameData.score > third.score){
+    //                                     if(playersInGame[i].gameData.score > second.score){
+    //                                         if(playersInGame[i].gameData.score > first.score){
+    //                                             //First Place
+    //                                             fifth.name = fourth.name;
+    //                                             fifth.score = fourth.score;
                                                 
-                                                fourth.name = third.name;
-                                                fourth.score = third.score;
+    //                                             fourth.name = third.name;
+    //                                             fourth.score = third.score;
                                                 
-                                                third.name = second.name;
-                                                third.score = second.score;
+    //                                             third.name = second.name;
+    //                                             third.score = second.score;
                                                 
-                                                second.name = first.name;
-                                                second.score = first.score;
+    //                                             second.name = first.name;
+    //                                             second.score = first.score;
                                                 
-                                                first.name = playersInGame[i].name;
-                                                first.score = playersInGame[i].gameData.score;
-                                            }else{
-                                                //Second Place
-                                                fifth.name = fourth.name;
-                                                fifth.score = fourth.score;
+    //                                             first.name = playersInGame[i].name;
+    //                                             first.score = playersInGame[i].gameData.score;
+    //                                         }else{
+    //                                             //Second Place
+    //                                             fifth.name = fourth.name;
+    //                                             fifth.score = fourth.score;
                                                 
-                                                fourth.name = third.name;
-                                                fourth.score = third.score;
+    //                                             fourth.name = third.name;
+    //                                             fourth.score = third.score;
                                                 
-                                                third.name = second.name;
-                                                third.score = second.score;
+    //                                             third.name = second.name;
+    //                                             third.score = second.score;
                                                 
-                                                second.name = playersInGame[i].name;
-                                                second.score = playersInGame[i].gameData.score;
-                                            }
-                                        }else{
-                                            //Third Place
-                                            fifth.name = fourth.name;
-                                            fifth.score = fourth.score;
+    //                                             second.name = playersInGame[i].name;
+    //                                             second.score = playersInGame[i].gameData.score;
+    //                                         }
+    //                                     }else{
+    //                                         //Third Place
+    //                                         fifth.name = fourth.name;
+    //                                         fifth.score = fourth.score;
                                                 
-                                            fourth.name = third.name;
-                                            fourth.score = third.score;
+    //                                         fourth.name = third.name;
+    //                                         fourth.score = third.score;
                                             
-                                            third.name = playersInGame[i].name;
-                                            third.score = playersInGame[i].gameData.score;
-                                        }
-                                    }else{
-                                        //Fourth Place
-                                        fifth.name = fourth.name;
-                                        fifth.score = fourth.score;
+    //                                         third.name = playersInGame[i].name;
+    //                                         third.score = playersInGame[i].gameData.score;
+    //                                     }
+    //                                 }else{
+    //                                     //Fourth Place
+    //                                     fifth.name = fourth.name;
+    //                                     fifth.score = fourth.score;
                                         
-                                        fourth.name = playersInGame[i].name;
-                                        fourth.score = playersInGame[i].gameData.score;
-                                    }
-                                }else{
-                                    //Fifth Place
-                                    fifth.name = playersInGame[i].name;
-                                    fifth.score = playersInGame[i].gameData.score;
-                                }
-                            }
-                        }
+    //                                     fourth.name = playersInGame[i].name;
+    //                                     fourth.score = playersInGame[i].gameData.score;
+    //                                 }
+    //                             }else{
+    //                                 //Fifth Place
+    //                                 fifth.name = playersInGame[i].name;
+    //                                 fifth.score = playersInGame[i].gameData.score;
+    //                             }
+    //                         }
+    //                     }
                         
-                        io.to(game.pin).emit('GameOver', {
-                            num1: first.name,
-                            num2: second.name,
-                            num3: third.name,
-                            num4: fourth.name,
-                            num5: fifth.name
-                        });
-                    }
-                });
-            });
+    //                     io.to(game.pin).emit('GameOver', {
+    //                         num1: first.name,
+    //                         num2: second.name,
+    //                         num3: third.name,
+    //                         num4: fourth.name,
+    //                         num5: fifth.name
+    //                     });
+    //                 }
+    //             });
+    //         });
         
-        io.to(game.pin).emit('nextQuestionPlayer');
-    });
+    //     io.to(game.pin).emit('nextQuestionPlayer');
+    // });
     
-    //When the host starts the game
-    socket.on('startGame', () => {
-        var game = games.getGame(socket.id);//Get the game based on socket.id
-        game.gameLive = true;
-        socket.emit('gameStarted', game.hostId);//Tell player and host that game has started
-    });
+    // //When the host starts the game
+    // socket.on('startGame', () => {
+    //     var game = games.getGame(socket.id);//Get the game based on socket.id
+    //     game.gameLive = true;
+    //     socket.emit('gameStarted', game.hostId);//Tell player and host that game has started
+    // });
     
-    //Give user game names data
-    socket.on('requestDbNames', function(){
+    // //Give user game names data
+    // socket.on('requestDbNames', function(){
         
-        MongoClient.connect(url, function(err, db){
-            if (err) throw err;
+    //     MongoClient.connect(url, function(err, db){
+    //         if (err) throw err;
     
-            var dbo = db.db('kahootDB');
-            dbo.collection("kahootGames").find().toArray(function(err, res) {
-                if (err) throw err;
-                socket.emit('gameNamesData', res);
-                db.close();
-            });
-        });
+    //         var dbo = db.db('kahootDB');
+    //         dbo.collection("kahootGames").find().toArray(function(err, res) {
+    //             if (err) throw err;
+    //             socket.emit('gameNamesData', res);
+    //             db.close();
+    //         });
+    //     });
         
          
-    });
+    // });
     
     
-    socket.on('newQuiz', function(data){
-        MongoClient.connect(url, function(err, db){
-            if (err) throw err;
-            var dbo = db.db('kahootDB');
-            dbo.collection('kahootGames').find({}).toArray(function(err, result){
-                if(err) throw err;
-                var num = Object.keys(result).length;
-                if(num == 0){
-                	data.id = 1
-                	num = 1
-                }else{
-                	data.id = result[num -1 ].id + 1;
-                }
-                var game = data;
-                dbo.collection("kahootGames").insertOne(game, function(err, res) {
-                    if (err) throw err;
-                    db.close();
-                });
-                db.close();
-                socket.emit('startGameFromCreator', num);
-            });
+    // socket.on('newQuiz', function(data){
+    //     MongoClient.connect(url, function(err, db){
+    //         if (err) throw err;
+    //         var dbo = db.db('kahootDB');
+    //         dbo.collection('kahootGames').find({}).toArray(function(err, result){
+    //             if(err) throw err;
+    //             var num = Object.keys(result).length;
+    //             if(num == 0){
+    //             	data.id = 1
+    //             	num = 1
+    //             }else{
+    //             	data.id = result[num -1 ].id + 1;
+    //             }
+    //             var game = data;
+    //             dbo.collection("kahootGames").insertOne(game, function(err, res) {
+    //                 if (err) throw err;
+    //                 db.close();
+    //             });
+    //             db.close();
+    //             socket.emit('startGameFromCreator', num);
+    //         });
             
-        });
+    //     });
         
         
-    });
+    // });
     
 });
