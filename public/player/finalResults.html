@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Final Results | KahootClone</title>
+        <link rel="stylesheet" href="../../css/playerGameView.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    </head>
+    <body>
+        <h2>Final Results</h2>
+        <div id="finalResultsList"></div>
+        <button onclick="goBack()">Go Back</button>
+        <script>
+            function goBack() {
+                window.history.back();
+            }
+
+            // Function to display final results
+            function displayFinalResults() {
+                const guessCounts = JSON.parse(localStorage.getItem('guessCounts')) || {};
+                const finalResultsList = document.getElementById("finalResultsList");
+                for (const guess in guessCounts) {
+                    finalResultsList.innerHTML += `<p>${guess}: ${guessCounts[guess]}</p>`;
+                }
+            }
+
+            // Call the display function on page load
+            window.onload = displayFinalResults;
+        </script>
+    </body>
+</html> 

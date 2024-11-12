@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Guess Results | KahootClone</title>
+        <link rel="stylesheet" href="../../css/playerGameView.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    </head>
+    <body>
+        <h2>Identical Guesses</h2>
+        <div id="resultsList"></div>
+        <button onclick="goBack()">Go Back to Game</button>
+        <script>
+            function goBack() {
+                window.history.back();
+            }
+
+            // Function to display identical guesses
+            function displayResults() {
+                const guessCounts = JSON.parse(localStorage.getItem('guessCounts')) || {};
+                const resultsList = document.getElementById("resultsList");
+                for (const guess in guessCounts) {
+                    resultsList.innerHTML += `<p>${guess}: ${guessCounts[guess]}</p>`;
+                }
+                // Increment the current topic index in local storage
+                let currentTopicIndex = parseInt(localStorage.getItem('currentTopicIndex')) || 0;
+                currentTopicIndex++;
+                localStorage.setItem('currentTopicIndex', currentTopicIndex);
+            }
+
+            // Call the display function on page load
+            window.onload = displayResults;
+        </script>
+    </body>
+</html> 

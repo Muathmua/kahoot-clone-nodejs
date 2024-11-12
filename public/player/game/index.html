@@ -2,25 +2,71 @@
 <html>
     <head>
         <title>Game | KahootClone</title>
-        <link rel = "stylesheet" href = "../../css/playerGameView.css">
+        <link rel="stylesheet" href="../../css/playerGameView.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     </head>
     <body>
-        <div id = "stats">
-            <h4 id = "nameText">Name: </h4>
-            <h4 id = "scoreText">Score: </h4>
-            <h4 id = "rankText"></h4>
+        <div id="stats">
+            <h4 id="nameText">Name: </h4>
+            <h4 id="scoreText">Score: </h4>
+            <h4 id="rankText"></h4>
         </div>
-        <!-- <h2 id = "message"></h2>
-        <button onclick = "answerSubmitted(1)" id = "answer1" class = "button"></button>
-        <button onclick = "answerSubmitted(2)" id = "answer2" class = "button"></button>
-        <br>
-        <button onclick = "answerSubmitted(3)" id = "answer3" class = "button"></button>
-        <button onclick = "answerSubmitted(4)" id = "answer4" class = "button"></button> -->
-        <script src = "../../socket.io/socket.io.js"></script>
-        <script src = "../../js/libs/jqueryLibrary.js"></script>
-        <script src = "../../js/libs/deparam.js"></script>
-        <script src = "../../js/playerGame.js"></script>
+        
+        <div id="guessSection">
+            <h2 id="topicText">Guess a word related to: </h2>
+            <input type="text" id="guessInput" placeholder="Enter your guess here">
+            <button id="submitGuess" onclick="submitGuess()">Submit Guess</button>
+        </div>
+        <script src="../../socket.io/socket.io.js"></script>
+        <script src="../../js/libs/jqueryLibrary.js"></script>
+        <script src="../../js/libs/deparam.js"></script>
+        <script src="../../js/playerGame.js"></script>
+        <script>
+            const topics = [
+                "Youtubers",
+                "Countries",
+                "Movies",
+                "Shows",
+                "Food",
+                "Athletes",
+                "Books",
+            ];
+            let currentTopicIndex = 0; // Track the current topic index
+            const guessCounts = {}; // Object to keep track of guess counts
+
+            function displayNextTopic() {
+                if (currentTopicIndex < topics.length) {
+                    const currentTopic = topics[currentTopicIndex];
+                    document.getElementById("topicText").innerText = "Guess a word related to: " + currentTopic;
+                } else {
+                    // Redirect to final results page if all topics are exhausted
+                    window.location.href = 'finalResults.html';
+                }
+            }
+
+            // Initial display of the first topic
+            displayNextTopic();
+
+            function submitGuess() {
+                const guessInput = document.getElementById("guessInput");
+                const guess = guessInput.value.trim();
+                if (guess) {
+                    // Update guess count
+                    guessCounts[guess] = (guessCounts[guess] || 0) + 1;
+
+                    // Store guess counts in local storage
+                    localStorage.setItem('guessCounts', JSON.stringify(guessCounts));
+
+                    // Redirect to results page
+                    window.location.href = 'results.html';
+                } else {
+                    alert("Please enter a guess!");
+                }
+            }
+
+            // Call this function to display the next topic when the page loads
+            window.onload = displayNextTopic;
+        </script>
     </body>
 </html>
